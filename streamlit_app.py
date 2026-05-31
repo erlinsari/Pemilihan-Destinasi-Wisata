@@ -2,7 +2,7 @@
 Streamlit App - SPK Pemilihan Destinasi Wisata Indonesia
 Metode: SMART + SAW + TOPSIS
 Dataset: Indonesia Tourism Destination (Kaggle)
-Optimized UI/UX: Pastel Blue Sidebar & High Contrast Visibility
+Optimized UI/UX: Pastel Blue Sidebar & High Contrast Visibility (No Powered Text)
 """
 
 import streamlit as st
@@ -56,7 +56,7 @@ st.markdown("""
         background-color: #f8fafc;
     }
     
-    /* 🛠️ FIX TEXT KONTRAS UTAMA (Mencegah teks hilang/putih di area putih) */
+    /* FIX TEXT KONTRAS UTAMA (Mencegah teks hilang/putih di area putih) */
     [data-testid="stMainBlock"] h1, 
     [data-testid="stMainBlock"] h2, 
     [data-testid="stMainBlock"] h3, 
@@ -80,7 +80,7 @@ st.markdown("""
         font-size: 1.1rem; color: #64748b; text-align: center; margin-bottom: 2.5rem; font-weight: 400;
     }
     
-    /* 🔵 SIDEBAR BARU: PASTEUR BLUE THEME WITH DARK TEXT */
+    /* SIDEBAR BARU: PASTEUR BLUE THEME WITH DARK TEXT */
     div[data-testid="stSidebar"] {
         background-color: #e0f2fe !important; /* Biru Pastel Terang */
         border-right: 1px solid #bae6fd;
@@ -337,7 +337,6 @@ with st.sidebar:
         st.sidebar.success("✅ Konfigurasi Bobot Valid (100%)")
 
     st.markdown("---")
-    st.caption("📌 Powered by Kaggle Dataset Portal Hub")
 
 
 # ─────────────────────────────────────────────
@@ -607,3 +606,7 @@ with tab_data:
 # ─────────────────────────────────────────────
 st.markdown("---")
 st.markdown("""
+<div style="text-align:center; color:#94a3b8; font-size:0.85rem; padding: 10px 0;">
+    &copy; 2026 Wonderful Indonesia SPK Platform Hub &bull; Framework SMART, SAW, & TOPSIS Integration
+</div>
+""", unsafe_allow_html=True)
