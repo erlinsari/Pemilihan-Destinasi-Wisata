@@ -2,7 +2,7 @@
 Streamlit App - SPK Pemilihan Destinasi Wisata Indonesia
 Metode: SMART + SAW + TOPSIS
 Dataset: Indonesia Tourism Destination (Kaggle)
-Optimized UI/UX: Pastel Blue Sidebar & High Contrast Visibility (No Powered Text)
+Optimized UI/UX: Dynamic Layout Columns (No Empty Spaces) & Removed Footer
 """
 
 import streamlit as st
@@ -40,11 +40,11 @@ plt.rcParams.update({
 })
 
 # ─────────────────────────────────────────────
-#  CSS CUSTOM (PASTEL BLUE SIDEBAR & HIGH CONTRAST)
+#  CSS CUSTOM (FIXED DROPDOWN ARROW & HIGH CONTRAST)
 # ─────────────────────────────────────────────
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap');
     
     /* Global Typography */
     html, body, [data-testid="stSidebar"] * {
@@ -80,31 +80,36 @@ st.markdown("""
         font-size: 1.1rem; color: #64748b; text-align: center; margin-bottom: 2.5rem; font-weight: 400;
     }
     
-    /* SIDEBAR BARU: PASTEUR BLUE THEME WITH DARK TEXT */
+    /* SIDEBAR: PASTEL BLUE THEME */
     div[data-testid="stSidebar"] {
-        background-color: #e0f2fe !important; /* Biru Pastel Terang */
+        background-color: #e0f2fe !important; 
         border-right: 1px solid #bae6fd;
     }
-    /* Memaksa semua tulisan di dalam sidebar berwarna gelap agar kontras */
     div[data-testid="stSidebar"] h2, 
     div[data-testid="stSidebar"] h3,
     div[data-testid="stSidebar"] h4 {
-        color: #0369a1 !important; /* Biru deep untuk judul menu */
+        color: #0369a1 !important; 
         font-weight: 700 !important;
     }
     div[data-testid="stSidebar"] label,
     div[data-testid="stSidebar"] p,
     div[data-testid="stSidebar"] span,
     div[data-testid="stSidebar"] .stCaption {
-        color: #1e293b !important; /* Abu gelap/hitam untuk teks biasa & label */
+        color: #1e293b !important; 
         font-weight: 600 !important;
     }
-    /* Warna teks di dalam form drop-down/select-box sidebar */
-    div[data-testid="stSidebar"] div[data-baseweb="select"] * {
+    
+    /* FIX DROPDOWN: Mengembalikan panah asli Streamlit dan teks hitam di selectbox */
+    div[data-testid="stSidebar"] div[data-baseweb="select"] {
+        background-color: #ffffff !important;
+        color: #1e293b !important;
+        border-radius: 8px;
+    }
+    div[data-testid="stSidebar"] div[data-baseweb="select"] div {
         color: #1e293b !important;
     }
     
-    /* Travel Destination Cards (Top 5) */
+    /* Travel Destination Cards */
     .tour-card {
         background: white;
         border-radius: 20px;
@@ -187,28 +192,45 @@ def load_data():
             df_rating = pd.read_csv(p)
             break
 
+    # ENGINE BACKUP: Jika file .csv belum terhubung, buat data komprehensif agar tidak ada filter yang kosong
     if df_main is None:
         np.random.seed(42)
-        place_templates = {
-            'Jakarta': ['Monas','Kota Tua','Ancol','TMII','Ragunan','Kepulauan Seribu','Museum Nasional','Museum Fatahillah'],
-            'Bandung': ['Kawah Putih','Tangkuban Perahu','Trans Studio','Lembang','Dusun Bambu','Situ Patenggang','Farmhouse','Orchid Forest'],
-            'Yogyakarta': ['Prambanan','Borobudur','Keraton Yogyakarta','Malioboro','Pantai Parangtritis','Goa Jomblang','Kalibiru','Merapi'],
-            'Bali': ['Tanah Lot','Ubud Palace','Kuta Beach','GWK Bali','Seminyak','Uluwatu Temple','Tirta Gangga','Tegallalang'],
-            'Surabaya': ['Kebun Binatang Surabaya','House of Sampoerna','Tugu Pahlawan','Pantai Kenjeran','Ciputra Waterpark','Suramadu Bridge','G-Walk','Monkasel']
-        }
+        cities = ['Jakarta', 'Bandung', 'Yogyakarta', 'Semarang', 'Surabaya']
+        categories_pool = ['Alam', 'Budaya', 'Taman Hiburan', 'Pusat Perbelanjaan', 'Tempat Ibadah', 'Bahari']
+        
         records, ratings_list = [], []
         pid = 1
-        for city, places in place_templates.items():
-            for place in places:
-                price = np.random.choice([0,5000,10000,15000,20000,25000,30000,50000,75000,100000])
-                rating = round(np.random.uniform(3.5, 5.0), 1)
-                time_m = np.random.choice([60,90,120,150,180,240,300])
-                n_rev = np.random.randint(80, 600)
-                records.append({'Place_Id':pid,'Place_Name':place,'Category':np.random.choice(['Budaya','Alam','Taman Hiburan','Bahari']),
-                                'City':city,'Price':price,'Rating':rating,'Time_Minutes':time_m})
-                for _ in range(n_rev):
-                    ratings_list.append({'Place_Id':pid,'Place_Ratings':np.random.randint(1,6)})
-                pid += 1
+        
+        # Lakukan iterasi silang penuh agar semua kombinasi kota & kategori terisi data formal
+        for city in cities:
+            for cat in categories_pool:
+                for k in range(np.random.randint(4, 7)):
+                    if cat == 'Alam':
+                        place_name = np.random.choice(["Wisata Alam", "Ekowisata", "Taman Raya", "Bukit Panorama"]) + f" {city} #{k+1}"
+                    elif cat == 'Budaya':
+                        place_name = np.random.choice(["Museum Kerajinan", "Gedung Heritage", "Kampung Budaya"]) + f" {city} #{k+1}"
+                    elif cat == 'Taman Hiburan':
+                        place_name = np.random.choice(["Waterboom Splas", "Theme Park Fantasy", "Playground"]) + f" {city} #{k+1}"
+                    elif cat == 'Tempat Ibadah':
+                        place_name = np.random.choice(["Masjid Agung", "Gedung Katedral", "Klenteng Bersejarah"]) + f" {city} #{k+1}"
+                    elif cat == 'Pusat Perbelanjaan':
+                        place_name = np.random.choice(["Sentra Batik Centro", "Grand Plaza Mall", "Pasar Seni"]) + f" {city} #{k+1}"
+                    else:
+                        place_name = np.random.choice(["Dermaga Bahari", "Pantai Pasir Putih", "Riset Mangrove"]) + f" {city} #{k+1}"
+
+                    price = np.random.choice([0, 5000, 10000, 15000, 25000, 50000, 100000])
+                    rating = round(np.random.uniform(4.0, 4.9), 1)
+                    time_m = np.random.choice([45, 60, 90, 120, 180])
+                    n_rev = np.random.randint(60, 400)
+                    
+                    records.append({
+                        'Place_Id': pid, 'Place_Name': place_name, 'Category': cat,
+                        'City': city, 'Price': price, 'Rating': rating, 'Time_Minutes': time_m
+                    })
+                    for _ in range(n_rev):
+                        ratings_list.append({'Place_Id': pid, 'Place_Ratings': np.random.randint(3, 6)})
+                    pid += 1
+                    
         df_main = pd.DataFrame(records)
         df_rating = pd.DataFrame(ratings_list)
 
@@ -308,7 +330,7 @@ def combine_results(df_base, df_saw, df_topsis, df_smart, criteria):
 #  SIDEBAR MANAGEMENT
 # ─────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("## 🌐 NAVIGATION PANEL")
+    st.markdown("## 🏝️ SPK DESTINASI WISATA")
     st.markdown("---")
     st.markdown("### 🔍 Filter Destinasi")
 
@@ -319,7 +341,7 @@ with st.sidebar:
     all_categories = ['Semua'] + sorted(df_all['Category'].unique().tolist())
     selected_cat = st.selectbox("Kategori Wisata", all_categories)
 
-    top_n = st.slider("Limit Rekomendasi (Top N)", min_value=10, max_value=min(100, len(df_all)), value=40, step=5)
+    top_n = st.slider("Limit Rekomendasi (Top N)", min_value=10, max_value=min(150, len(df_all)), value=40, step=5)
 
     st.markdown("---")
     st.markdown("### ⚖️ Bobot Prioritas Kriteria")
@@ -364,8 +386,8 @@ if selected_cat != 'Semua':
 
 df_work = df_work.nlargest(top_n, 'Rating').reset_index(drop=True)
 
-if len(df_work) < 3:
-    st.warning("⚠️ Data hasil pencarian terlalu sedikit. Silakan ubah cakupan kombinasi filter pada sidebar.")
+if len(df_work) < 1:
+    st.warning("⚠️ Data hasil pencarian tidak ditemukan. Silakan ubah kombinasi filter Anda.")
     st.stop()
 
 # Execution Algorithm Machine
@@ -398,31 +420,34 @@ with tab_overview:
         st.metric(label="Opsi Tiket Termurah", value=f"Rp {df_work['Price'].min():,}")
 
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("### 🏆 Top 5 Destinasi Rekomendasi Utama (Konsensus Multi-Metode)")
+    st.markdown("### 🏆 Top Rekomendasi Utama (Konsensus Multi-Metode)")
     
-    # Premium Travel Cards Creation
+    # PREMIUM FIX: Kolom dibuat dinamis menyesuaikan data yang tersedia untuk membuang area kosong
     top5 = df_final.head(5)
-    cols = st.columns(5)
-    medals = ["🥇 Rank 1", "🥈 Rank 2", "🥉 Rank 3", "🏅 Rank 4", "🏅 Rank 5"]
-    badge_classes = ["badge-1", "badge-2", "badge-3", "badge-general", "badge-general"]
+    num_cards = len(top5)
     
-    for i, (_, row) in enumerate(top5.iterrows()):
-        with cols[i]:
-            st.markdown(f"""
-            <div class="tour-card">
-                <div>
-                    <span class="card-badge {badge_classes[i]}">{medals[i]}</span>
-                    <br><br>
-                    <h4 style="margin: 12px 0 6px 0; color: #0f172a; font-size: 1.1rem; font-weight:700;">{row['Place_Name']}</h4>
-                    <p style="color: #64748b; font-size: 0.8rem; margin: 0;">📍 {row['City']} &bull; <span style="font-style: italic;">{row['Category']}</span></p>
+    if num_cards > 0:
+        cols = st.columns(num_cards)
+        medals = ["🥇 Rank 1", "🥈 Rank 2", "🥉 Rank 3", "🏅 Rank 4", "🏅 Rank 5"]
+        badge_classes = ["badge-1", "badge-2", "badge-3", "badge-general", "badge-general"]
+        
+        for i, (_, row) in enumerate(top5.iterrows()):
+            with cols[i]:
+                st.markdown(f"""
+                <div class="tour-card">
+                    <div>
+                        <span class="card-badge {badge_classes[i]}">{medals[i]}</span>
+                        <br><br>
+                        <h4 style="margin: 12px 0 6px 0; color: #0f172a; font-size: 1.1rem; font-weight:700;">{row['Place_Name']}</h4>
+                        <p style="color: #64748b; font-size: 0.8rem; margin: 0;">📍 {row['City']} &bull; <span style="font-style: italic;">{row['Category']}</span></p>
+                    </div>
+                    <div style="margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 12px;">
+                        <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 4px;">Konsistensi Multi-Skor</div>
+                        <div style="font-size: 1.1rem; font-weight: 800; color: #0d9488;">{row['TOPSIS_Score']:.3f} <span style="font-size:0.7rem; font-weight:400; color:#64748b;">(Top)</span></div>
+                        <div style="font-size: 0.75rem; color: #475569; margin-top: 4px;">⭐ {row['Rating']:.1f} | Rp {row['Price']:,}</div>
+                    </div>
                 </div>
-                <div style="margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 12px;">
-                    <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 4px;">Konsistensi Multi-Skor</div>
-                    <div style="font-size: 1.1rem; font-weight: 800; color: #0d9488;">{row['TOPSIS_Score']:.3f} <span style="font-size:0.7rem; font-weight:400; color:#64748b;">(Top)</span></div>
-                    <div style="font-size: 0.75rem; color: #475569; margin-top: 4px;">⭐ {row['Rating']:.1f} | Rp {row['Price']:,}</div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+                """, unsafe_allow_html=True)
 
     st.markdown("<br><br>", unsafe_allow_html=True)
     
@@ -467,7 +492,7 @@ with tab_saw:
     </div>
     """, unsafe_allow_html=True)
 
-    saw_top_n = st.slider("Tampilkan Data Teratas", 5, min(30, len(df_saw)), 10, key='saw_slider')
+    saw_top_n = st.slider("Tampilkan Data Teratas", 5, min(30, len(df_saw)), min(10, len(df_saw)), key='saw_slider')
     
     df_saw_display = df_saw.head(saw_top_n)[
         ['SAW_Rank','Place_Name','City','Category','Price','Rating','Jumlah_Review','Time_Minutes','SAW_Score']
@@ -476,9 +501,9 @@ with tab_saw:
     st.dataframe(df_saw_display.style.background_gradient(subset=['Skor Akhir SAW'], cmap='BuGn'), hide_index=True, use_container_width=True)
 
     # Chart Performance
-    st.markdown("<br><b>Peta Komparasi 10 Besar Hasil Model SAW</b>", unsafe_allow_html=True)
+    st.markdown("<br><b>Peta Komparasi Hasil Model SAW</b>", unsafe_allow_html=True)
     fig, ax = plt.subplots(figsize=(10, 4.2))
-    saw_g = df_saw.head(10)
+    saw_g = df_saw.head(min(10, len(df_saw)))
     ax.barh(saw_g['Place_Name'], saw_g['SAW_Score'], color='#0d9488', alpha=0.85, height=0.6)
     ax.invert_yaxis()
     ax.spines['top'].set_visible(False)
@@ -499,7 +524,7 @@ with tab_topsis:
     </div>
     """, unsafe_allow_html=True)
 
-    topsis_top_n = st.slider("Tampilkan Data Teratas", 5, min(30, len(df_topsis)), 10, key='topsis_slider')
+    topsis_top_n = st.slider("Tampilkan Data Teratas", 5, min(30, len(df_topsis)), min(10, len(df_topsis)), key='topsis_slider')
     
     df_topsis_display = df_topsis.head(topsis_top_n)[
         ['TOPSIS_Rank','Place_Name','City','Category','Price','Rating','Jumlah_Review','Time_Minutes','D_pos','D_neg','TOPSIS_Score']
@@ -532,7 +557,7 @@ with tab_smart:
     </div>
     """, unsafe_allow_html=True)
 
-    smart_top_n = st.slider("Tampilkan Data Teratas", 5, min(30, len(df_smart)), 10, key='smart_slider')
+    smart_top_n = st.slider("Tampilkan Data Teratas", 5, min(30, len(df_smart)), min(10, len(df_smart)), key='smart_slider')
     
     df_smart_display = df_smart.head(smart_top_n)[
         ['SMART_Rank','Place_Name','City','Category','Price','Rating','Jumlah_Review','Time_Minutes','SMART_Score']
@@ -548,9 +573,9 @@ with tab_compare:
     st.markdown("### 🔄 Validasi & Komparasi Antar Algoritma")
     
     c_col1, c_col2, c_col3 = st.columns(3)
-    c_col1.metric("Juara 1 Model SAW", df_saw.iloc[0]['Place_Name'])
-    c_col2.metric("Juara 1 Model TOPSIS", df_topsis.iloc[0]['Place_Name'])
-    c_col3.metric("Juara 1 Model SMART", df_smart.iloc[0]['Place_Name'])
+    c_col1.metric("Juara 1 Model SAW", df_saw.iloc[0]['Place_Name'] if len(df_saw) > 0 else "-")
+    c_col2.metric("Juara 1 Model TOPSIS", df_topsis.iloc[0]['Place_Name'] if len(df_topsis) > 0 else "-")
+    c_col3.metric("Juara 1 Model SMART", df_smart.iloc[0]['Place_Name'] if len(df_smart) > 0 else "-")
     
     st.markdown("<br><b>Tabel Komparasi Matrix Peringkat (Top 15)</b>", unsafe_allow_html=True)
     show_cols = ['Final_Rank','Place_Name','City','SAW_Rank','TOPSIS_Rank','SMART_Rank','Avg_Rank']
@@ -602,11 +627,6 @@ with tab_data:
     st.dataframe(df_work[CRITERIA].describe().round(2), use_container_width=True)
 
 # ─────────────────────────────────────────────
-#  FOOTER
+#  FOOTER SECTION (HAPUS BERSIH)
 # ─────────────────────────────────────────────
 st.markdown("---")
-st.markdown("""
-<div style="text-align:center; color:#94a3b8; font-size:0.85rem; padding: 10px 0;">
-    &copy; 2026 Wonderful Indonesia SPK Platform Hub &bull; Framework SMART, SAW, & TOPSIS Integration
-</div>
-""", unsafe_allow_html=True)
