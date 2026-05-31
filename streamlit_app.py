@@ -2,7 +2,7 @@
 Streamlit App - SPK Pemilihan Destinasi Wisata Indonesia
 Metode: SMART + SAW + TOPSIS
 Dataset: Indonesia Tourism Destination (Kaggle)
-Optimized UI/UX: Professional Travel Platform Aesthetic
+Optimized UI/UX: Pastel Blue Sidebar & High Contrast Visibility
 """
 
 import streamlit as st
@@ -40,7 +40,7 @@ plt.rcParams.update({
 })
 
 # ─────────────────────────────────────────────
-#  CSS CUSTOM (PREMIUM TRAVEL SITE LOOK)
+#  CSS CUSTOM (PASTEL BLUE SIDEBAR & HIGH CONTRAST)
 # ─────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -51,15 +51,24 @@ st.markdown("""
         font-family: 'Plus Jakarta Sans', sans-serif;
     }
     
-    /* Main Background & Layout */
+    /* Main Background */
     .stApp {
         background-color: #f8fafc;
+    }
+    
+    /* 🛠️ FIX TEXT KONTRAS UTAMA (Mencegah teks hilang/putih di area putih) */
+    [data-testid="stMainBlock"] h1, 
+    [data-testid="stMainBlock"] h2, 
+    [data-testid="stMainBlock"] h3, 
+    [data-testid="stMainBlock"] h4,
+    [data-testid="stMainBlock"] .stMarkdown p {
+        color: #0f172a !important;
     }
     
     /* Header Section */
     .brand-badge {
         background: linear-gradient(135deg, #0d9488 0%, #0ea5e9 100%);
-        color: white; padding: 6px 16px; border-radius: 50px;
+        color: white !important; padding: 6px 16px; border-radius: 50px;
         font-size: 0.75rem; font-weight: 700; letter-spacing: 1px;
         text-transform: uppercase; display: inline-block; margin-bottom: 0.5rem;
     }
@@ -69,6 +78,30 @@ st.markdown("""
     }
     .sub-title {
         font-size: 1.1rem; color: #64748b; text-align: center; margin-bottom: 2.5rem; font-weight: 400;
+    }
+    
+    /* 🔵 SIDEBAR BARU: PASTEUR BLUE THEME WITH DARK TEXT */
+    div[data-testid="stSidebar"] {
+        background-color: #e0f2fe !important; /* Biru Pastel Terang */
+        border-right: 1px solid #bae6fd;
+    }
+    /* Memaksa semua tulisan di dalam sidebar berwarna gelap agar kontras */
+    div[data-testid="stSidebar"] h2, 
+    div[data-testid="stSidebar"] h3,
+    div[data-testid="stSidebar"] h4 {
+        color: #0369a1 !important; /* Biru deep untuk judul menu */
+        font-weight: 700 !important;
+    }
+    div[data-testid="stSidebar"] label,
+    div[data-testid="stSidebar"] p,
+    div[data-testid="stSidebar"] span,
+    div[data-testid="stSidebar"] .stCaption {
+        color: #1e293b !important; /* Abu gelap/hitam untuk teks biasa & label */
+        font-weight: 600 !important;
+    }
+    /* Warna teks di dalam form drop-down/select-box sidebar */
+    div[data-testid="stSidebar"] div[data-baseweb="select"] * {
+        color: #1e293b !important;
     }
     
     /* Travel Destination Cards (Top 5) */
@@ -106,20 +139,6 @@ st.markdown("""
         background: white; border-left: 5px solid #0d9488;
         padding: 1.2rem 1.5rem; border-radius: 12px; margin: 1rem 0 1.5rem 0;
         box-shadow: 0 2px 12px rgba(0,0,0,0.02);
-    }
-    
-    /* Sidebar Styling Refinement */
-    div[data-testid="stSidebar"] {
-        background-color: #0f172a;
-        border-right: 1px solid #1e293b;
-    }
-    div[data-testid="stSidebar"] .stMarkdown h2, 
-    div[data-testid="stSidebar"] .stMarkdown h3 {
-        color: #f8fafc !important; font-weight: 700;
-    }
-    div[data-testid="stSidebar"] .stSlider label, 
-    div[data-testid="stSidebar"] .stSelectbox label {
-        color: #cbd5e1 !important; font-weight: 500; font-size: 0.85rem;
     }
     
     /* Tabs Custom Interface */
@@ -169,7 +188,6 @@ def load_data():
             break
 
     if df_main is None:
-        # Generate realistic fallback sample data
         np.random.seed(42)
         place_templates = {
             'Jakarta': ['Monas','Kota Tua','Ancol','TMII','Ragunan','Kepulauan Seribu','Museum Nasional','Museum Fatahillah'],
@@ -335,12 +353,6 @@ if total_w != 100:
 
 # Build Configuration Environment
 CRITERIA = ['Price', 'Rating', 'Jumlah_Review', 'Time_Minutes']
-CRITERIA_LABELS = {
-    'Price': 'Harga Tiket',
-    'Rating': 'Rating Pengunjung',
-    'Jumlah_Review': 'Popularitas (Review)',
-    'Time_Minutes': 'Waktu Durasi'
-}
 BENEFIT = {'Price': False, 'Rating': True, 'Jumlah_Review': True, 'Time_Minutes': True}
 WEIGHTS = {'Price': w_price/100, 'Rating': w_rating/100, 'Jumlah_Review': w_review/100, 'Time_Minutes': w_time/100}
 
@@ -595,7 +607,3 @@ with tab_data:
 # ─────────────────────────────────────────────
 st.markdown("---")
 st.markdown("""
-<div style="text-align:center; color:#94a3b8; font-size:0.85rem; padding: 10px 0;">
-    &copy; 2026 Wonderful Indonesia SPK Platform Hub &bull; Framework SMART, SAW, & TOPSIS Integration &bull; Powered by Streamlit Custom Engine
-</div>
-""", unsafe_allow_html=True)
