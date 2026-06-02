@@ -26,24 +26,49 @@ st.set_page_config(
 )
 
 # ─────────────────────────────────────────────
-#  CSS CUSTOM (UPDATE TERBARU - UI MODERN)
+#  CSS CUSTOM (ANTI-TEXT GAIB / FIX DARK-LIGHT CONFLICT)
 # ─────────────────────────────────────────────
 st.markdown("""
 <style>
-    /* General Styling */
+    /* Latar Belakang Utama Berwarna Terang */
     .stApp { background-color: #f8f9fa; }
     
-    /* Sidebar Styling */
+    /* Memaksa Semua Teks di Area Utama Berwarna Gelap (Mengatasi Bug Dark Mode Sistem) */
+    [data-testid="stAppViewContainer"] main h1,
+    [data-testid="stAppViewContainer"] main h2,
+    [data-testid="stAppViewContainer"] main h3,
+    [data-testid="stAppViewContainer"] main h4,
+    [data-testid="stAppViewContainer"] main h5,
+    [data-testid="stAppViewContainer"] main h6,
+    [data-testid="stAppViewContainer"] main p,
+    [data-testid="stAppViewContainer"] main label,
+    [data-testid="stAppViewContainer"] main span,
+    [data-testid="stAppViewContainer"] main small {
+        color: #2d3436 !important;
+    }
+    
+    /* Memperbaiki Kontras Teks di dalam Alert/Warning Box */
+    div[data-testid="stAlert"] * {
+        color: #721c24 !important;
+    }
+    
+    /* Sidebar Tetap Gelap Elegan Sesuai Desain Awalmu */
     div[data-testid="stSidebar"] {
-        background-color: #ffffff;
-        border-right: 1px solid #e9ecef;
+        background-color: #1a1a2e !important;
+    }
+    div[data-testid="stSidebar"] * {
+        color: #e0e0e0 !important;
+    }
+    div[data-testid="stSidebar"] .stSelectbox label,
+    div[data-testid="stSidebar"] .stSlider label {
+        color: #adb5bd !important;
     }
     
     /* Title/Header Styling */
     .main-title {
         font-size: 2.5rem; 
         font-weight: 700; 
-        color: #2d3436;
+        color: #2d3436 !important;
         margin-bottom: 0.5rem;
     }
     
@@ -63,19 +88,18 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] {
         background-color: transparent;
         font-weight: 600;
-        color: #636e72;
+        color: #636e72 !important;
     }
-    .stTabs [aria-selected="true"] { color: #0984e3 !important; }
+    .stTabs [aria-selected="true"] span { color: #0984e3 !important; }
 
     /* Button Styling */
     div.stButton > button {
         border-radius: 8px;
         border: none;
         background-color: #0984e3;
-        color: white;
+        color: white !important;
     }
     
-    /* Method Box Adjustment for Light Theme */
     .method-box {
         background: #ffffff; border-left: 4px solid #0984e3;
         padding: 0.8rem 1rem; border-radius: 8px; margin: 0.5rem 0;
@@ -90,7 +114,6 @@ st.markdown("""
 # ─────────────────────────────────────────────
 @st.cache_data
 def load_data():
-    """Load dan preprocess dataset Indonesia Tourism Destination."""
     possible_paths = [
         '/kaggle/input/indonesia-tourism-destination/tourism_with_id.csv',
         'tourism_with_id.csv',
@@ -113,7 +136,6 @@ def load_data():
             break
 
     if df_main is None:
-        # Generate realistic sample data jika file tidak ditemukan
         np.random.seed(42)
         place_templates = {
             'Jakarta': ['Monas','Kota Tua','Ancol','TMII','Ragunan','Kepulauan Seribu','Museum Nasional','Museum Fatahillah'],
@@ -130,7 +152,9 @@ def load_data():
                 rating = round(np.random.uniform(3.5, 5.0), 1)
                 time_m = np.random.choice([60,90,120,150,180,240,300])
                 n_rev = np.random.randint(80, 600)
-                records.append({'Place_Id':pid,'Place_Name':place,'Category':np.random.choice(['Budaya','Alam','Taman Hiburan','Bahari']),
+                # Memastikan distribusi kategori agar tidak kosong saat difilter
+                cat_choice = ['Budaya','Alam','Taman Hiburan','Bahari'][pid % 4]
+                records.append({'Place_Id':pid,'Place_Name':place,'Category':cat_choice,
                                 'City':city,'Price':price,'Rating':rating,'Time_Minutes':time_m})
                 for _ in range(n_rev):
                     ratings_list.append({'Place_Id':pid,'Place_Ratings':np.random.randint(1,6)})
@@ -278,7 +302,7 @@ if total_w != 100:
     st.error("⚠️ Sesuaikan bobot di sidebar hingga totalnya = 100% untuk menjalankan analisis.")
     st.stop()
 
-# ─── Data & Weight Initialization ───
+# Data & Weight Initialization
 CRITERIA = ['Price', 'Rating', 'Jumlah_Review', 'Time_Minutes']
 CRITERIA_LABELS = {
     'Price': 'Harga Tiket (Rp)',
@@ -303,8 +327,9 @@ if selected_cat != 'Semua':
 
 df_work = df_work.nlargest(top_n, 'Rating').reset_index(drop=True)
 
+# JIKA DATA TERLALU SEDIKIT, BERIKAN PERINGATAN YANG JELAS DAN JANGAN KOSONGKAN HALAMAN
 if len(df_work) < 3:
-    st.warning("Data terlalu sedikit. Ubah filter di sidebar.")
+    st.warning("⚠️ Data hasil filter terlalu sedikit (kurang dari 3 alternatif). Silakan ubah filter Kota atau Kategori di Sidebar untuk memunculkan kembali grafik perhitungan.")
     st.stop()
 
 # Perhitungan SPK
@@ -315,7 +340,7 @@ df_final  = combine_results(df_work, df_saw, df_topsis, df_smart, CRITERIA)
 
 
 # ─────────────────────────────────────────────
-#  TABS INITIALIZATION (Penting: Sebelum dipanggil block with!)
+#  TABS INITIALIZATION
 # ─────────────────────────────────────────────
 tab_overview, tab_saw, tab_topsis, tab_smart, tab_compare, tab_data = st.tabs([
     "📊 Overview", "📐 SAW", "🎯 TOPSIS", "⭐ SMART", "🔄 Perbandingan", "📁 Data"
@@ -326,7 +351,6 @@ tab_overview, tab_saw, tab_topsis, tab_smart, tab_compare, tab_data = st.tabs([
 #  TAB: OVERVIEW
 # ══════════════════════════════════════════════
 with tab_overview:
-    # Menggunakan columns untuk statistik singkat
     c1, c2, c3, c4 = st.columns(4)
     with c1: st.metric("Total Data", len(df_work))
     with c2: st.metric("Kota Tersedia", df_work['City'].nunique())
@@ -394,21 +418,6 @@ with tab_saw:
     ].rename(columns={'SAW_Rank':'Rank', 'SAW_Score':'Skor SAW'})
     st.dataframe(display_saw.style.background_gradient(subset=['Skor SAW'], cmap='Blues'),
                  hide_index=True, use_container_width=True)
-
-    st.markdown("### 📊 Top 10 - Skor SAW")
-    fig, ax = plt.subplots(figsize=(10, 5))
-    top10_saw = df_saw.head(10)
-    bars = ax.barh(top10_saw['Place_Name'].str[:22], top10_saw['SAW_Score'],
-                   color='#2196F3', edgecolor='white', alpha=0.85)
-    for bar, val in zip(bars, top10_saw['SAW_Score']):
-        ax.text(bar.get_width()*0.5, bar.get_y()+bar.get_height()/2,
-                f'{val:.3f}', ha='center', va='center', color='white', fontweight='bold', fontsize=9)
-    ax.set_title('Top 10 Destinasi - Skor SAW', fontweight='bold')
-    ax.set_xlabel('Skor SAW')
-    ax.invert_yaxis()
-    plt.tight_layout()
-    st.pyplot(fig)
-    plt.close()
 
 
 # ══════════════════════════════════════════════
@@ -511,9 +520,6 @@ with tab_data:
 
     st.dataframe(df_display[['Place_Name','City','Category','Price','Rating','Jumlah_Review','Time_Minutes']],
                  hide_index=True, use_container_width=True, height=450)
-
-    st.markdown("### 📊 Statistik Deskriptif")
-    st.dataframe(df_work[CRITERIA].describe().round(2), use_container_width=True)
 
 # Footer
 st.markdown("---")
