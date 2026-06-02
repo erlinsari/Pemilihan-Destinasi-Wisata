@@ -26,94 +26,75 @@ st.set_page_config(
 )
 
 # ─────────────────────────────────────────────
-#  CSS CUSTOM (ANTI-TEXT GAIB / FIX DARK-LIGHT CONFLICT)
+#  CSS CUSTOM (ANTI TEKS PUTIH / DARK MODE CONFLICT FIX)
 # ─────────────────────────────────────────────
 st.markdown("""
 <style>
-    /* Latar Belakang Utama Berwarna Terang */
-    .stApp { background-color: #f8f9fa; }
-    
-    /* Memaksa Semua Teks di Area Utama Berwarna Gelap (Mengatasi Bug Dark Mode Sistem) */
-    [data-testid="stAppViewContainer"] main h1,
-    [data-testid="stAppViewContainer"] main h2,
-    [data-testid="stAppViewContainer"] main h3,
-    [data-testid="stAppViewContainer"] main h4,
-    [data-testid="stAppViewContainer"] main h5,
-    [data-testid="stAppViewContainer"] main h6,
-    [data-testid="stAppViewContainer"] main p,
-    [data-testid="stAppViewContainer"] main label,
-    [data-testid="stAppViewContainer"] main span,
-    [data-testid="stAppViewContainer"] main small {
-        color: #2d3436 !important;
+    /* Latar belakang utama aplikasi */
+    .stApp {
+        background-color: #f8f9fa !important;
     }
     
-    /* Memperbaiki Kontras Teks di dalam Alert/Warning Box */
-    div[data-testid="stAlert"] * {
+    /* FIX: Paksa teks bawaan Streamlit di area utama berwarna gelap agar tidak gaib */
+    .stMarkdown p, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4, .stMarkdown h5, .stMarkdown h6, .stMarkdown li, .stMarkdown span {
+        color: #1a1a2e !important;
+    }
+    
+    /* Perbaikan teks komponen Metric bawaan */
+    [data-testid="stMetricLabel"] div {
+        color: #555555 !important;
+    }
+    [data-testid="stMetricValue"] div {
+        color: #1a1a2e !important;
+    }
+    
+    /* Perbaikan teks komponen Tab bawaan */
+    .stTabs [data-baseweb="tab"] p {
+        color: #555555 !important;
+    }
+    .stTabs [aria-selected="true"] p {
+        color: #667eea !important;
+        font-weight: bold;
+    }
+    
+    /* Perbaikan teks info/warning alert box agar kontras */
+    div[data-testid="stAlert"] p {
         color: #721c24 !important;
     }
-    
-    /* Sidebar Tetap Gelap Elegan Sesuai Desain Awalmu */
-    div[data-testid="stSidebar"] {
-        background-color: #1a1a2e !important;
-    }
-    div[data-testid="stSidebar"] * {
-        color: #e0e0e0 !important;
-    }
-    div[data-testid="stSidebar"] .stSelectbox label,
-    div[data-testid="stSidebar"] .stSlider label {
-        color: #adb5bd !important;
-    }
-    
-    /* Title/Header Styling */
-    .main-title {
-        font-size: 2.5rem; 
-        font-weight: 700; 
-        color: #2d3436 !important;
-        margin-bottom: 0.5rem;
-    }
-    
-    /* Card Styling */
-    .metric-card {
-        background: #ffffff;
-        padding: 1.5rem;
-        border-radius: 15px;
-        border: 1px solid #e9ecef;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        text-align: center;
-        margin-bottom: 1rem;
-    }
-    
-    /* Tabs styling */
-    .stTabs [data-baseweb="tab-list"] { gap: 20px; }
-    .stTabs [data-baseweb="tab"] {
-        background-color: transparent;
-        font-weight: 600;
-        color: #636e72 !important;
-    }
-    .stTabs [aria-selected="true"] span { color: #0984e3 !important; }
 
-    /* Button Styling */
-    div.stButton > button {
-        border-radius: 8px;
-        border: none;
-        background-color: #0984e3;
-        color: white !important;
+    /* Style titles & cards */
+    .main-title {
+        font-size: 2.2rem; font-weight: 800; color: #1a1a2e;
+        text-align: center; padding: 1rem 0 0.3rem;
+    }
+    .sub-title {
+        font-size: 1rem; color: #555; text-align: center; margin-bottom: 1.5rem;
+    }
+    .method-box {
+        background: #f8f9ff; border-left: 4px solid #667eea;
+        padding: 0.8rem 1rem; border-radius: 8px; margin: 0.5rem 0;
     }
     
-    .method-box {
-        background: #ffffff; border-left: 4px solid #0984e3;
-        padding: 0.8rem 1rem; border-radius: 8px; margin: 0.5rem 0;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    /* Sidebar styling tetap gelap elegan */
+    div[data-testid="stSidebar"] {background: #1a1a2e;}
+    div[data-testid="stSidebar"] * {color: #e0e0e0 !important;}
+    div[data-testid="stSidebar"] .stSelectbox label,
+    div[data-testid="stSidebar"] .stSlider label {color: #adb5bd !important;}
+    .stTabs [data-baseweb="tab-list"] {gap: 8px;}
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 8px 8px 0 0;
+        background: #f0f2f6; padding: 8px 20px;
     }
 </style>
 """, unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────
-#  LOAD DATA (BACKEND)
+#  LOAD DATA
 # ─────────────────────────────────────────────
 @st.cache_data
 def load_data():
+    """Load dan preprocess dataset Indonesia Tourism Destination."""
     possible_paths = [
         '/kaggle/input/indonesia-tourism-destination/tourism_with_id.csv',
         'tourism_with_id.csv',
@@ -152,7 +133,7 @@ def load_data():
                 rating = round(np.random.uniform(3.5, 5.0), 1)
                 time_m = np.random.choice([60,90,120,150,180,240,300])
                 n_rev = np.random.randint(80, 600)
-                # Memastikan distribusi kategori agar tidak kosong saat difilter
+                # Menyiasati distribusi kategori agar tidak kosong saat difilter Bali + Alam
                 cat_choice = ['Budaya','Alam','Taman Hiburan','Bahari'][pid % 4]
                 records.append({'Place_Id':pid,'Place_Name':place,'Category':cat_choice,
                                 'City':city,'Price':price,'Rating':rating,'Time_Minutes':time_m})
@@ -174,7 +155,7 @@ def load_data():
 
 
 # ─────────────────────────────────────────────
-#  SPK METHODS (BACKEND LOGIC)
+#  SPK METHODS
 # ─────────────────────────────────────────────
 def normalize_saw(X, criteria, benefit):
     R = np.zeros_like(X, dtype=float)
@@ -255,7 +236,7 @@ def combine_results(df_base, df_saw, df_topsis, df_smart, criteria):
 
 
 # ─────────────────────────────────────────────
-#  SIDEBAR FILTER
+#  SIDEBAR ELEMENTS
 # ─────────────────────────────────────────────
 with st.sidebar:
     st.markdown("## 🏝️ SPK Wisata")
@@ -291,18 +272,15 @@ with st.sidebar:
 
 
 # ─────────────────────────────────────────────
-#  MAIN UI COMPONENT
+#  MAIN RUN DATA PROCESS
 # ─────────────────────────────────────────────
 st.markdown('<div class="main-title">🏝️ WisataInsight Indonesia</div>', unsafe_allow_html=True)
-st.subheader("Sistem Pendukung Keputusan Destinasi Wisata")
-st.markdown("Analisis keputusan multi-kriteria untuk rekomendasi terbaik.")
-st.markdown("---")
+st.markdown('<div class="sub-title">Pemilihan Destinasi Wisata Indonesia • SMART + SAW + TOPSIS</div>', unsafe_allow_html=True)
 
 if total_w != 100:
     st.error("⚠️ Sesuaikan bobot di sidebar hingga totalnya = 100% untuk menjalankan analisis.")
     st.stop()
 
-# Data & Weight Initialization
 CRITERIA = ['Price', 'Rating', 'Jumlah_Review', 'Time_Minutes']
 CRITERIA_LABELS = {
     'Price': 'Harga Tiket (Rp)',
@@ -318,7 +296,7 @@ WEIGHTS = {
     'Time_Minutes': w_time/100,
 }
 
-# Filter Execution
+# Filter execution
 df_work = df_all.copy()
 if selected_city != 'Semua':
     df_work = df_work[df_work['City'] == selected_city]
@@ -327,12 +305,12 @@ if selected_cat != 'Semua':
 
 df_work = df_work.nlargest(top_n, 'Rating').reset_index(drop=True)
 
-# JIKA DATA TERLALU SEDIKIT, BERIKAN PERINGATAN YANG JELAS DAN JANGAN KOSONGKAN HALAMAN
+# Jika hasil filter terlalu sedikit, beri peringatan agar user mengganti parameternya
 if len(df_work) < 3:
-    st.warning("⚠️ Data hasil filter terlalu sedikit (kurang dari 3 alternatif). Silakan ubah filter Kota atau Kategori di Sidebar untuk memunculkan kembali grafik perhitungan.")
+    st.warning("⚠️ Hasil data filter terlalu sedikit (kurang dari 3). Silakan ubah pilihan Kota atau Kategori di sidebar agar data bisa diproses kembali.")
     st.stop()
 
-# Perhitungan SPK
+# Run SPK Algorithms
 df_saw    = saw_method(df_work, CRITERIA, WEIGHTS, BENEFIT)
 df_topsis = topsis_method(df_work, CRITERIA, WEIGHTS, BENEFIT)
 df_smart  = smart_method(df_work, CRITERIA, WEIGHTS, BENEFIT)
@@ -340,7 +318,7 @@ df_final  = combine_results(df_work, df_saw, df_topsis, df_smart, CRITERIA)
 
 
 # ─────────────────────────────────────────────
-#  TABS INITIALIZATION
+#  INITIALIZE TABS IN EXACT ORDER
 # ─────────────────────────────────────────────
 tab_overview, tab_saw, tab_topsis, tab_smart, tab_compare, tab_data = st.tabs([
     "📊 Overview", "📐 SAW", "🎯 TOPSIS", "⭐ SMART", "🔄 Perbandingan", "📁 Data"
@@ -351,22 +329,36 @@ tab_overview, tab_saw, tab_topsis, tab_smart, tab_compare, tab_data = st.tabs([
 #  TAB: OVERVIEW
 # ══════════════════════════════════════════════
 with tab_overview:
-    c1, c2, c3, c4 = st.columns(4)
-    with c1: st.metric("Total Data", len(df_work))
-    with c2: st.metric("Kota Tersedia", df_work['City'].nunique())
-    with c3: st.metric("Rating Max", f"{df_work['Rating'].max():.1f}")
-    with c4: st.metric("Harga Terendah", f"Rp {df_work['Price'].min():,.0f}")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("📍 Total Destinasi", len(df_work))
+    with col2:
+        st.metric("🏙️ Kota", df_work['City'].nunique())
+    with col3:
+        st.metric("⭐ Rating Tertinggi", f"{df_work['Rating'].max():.1f}")
+    with col4:
+        st.metric("🎫 Harga Min (Rp)", f"{df_work['Price'].min():,.0f}")
 
-    st.divider()
-    
-    st.markdown("### 🏆 Top 3 Rekomendasi Utama")
-    top3 = df_final.head(3)
-    cols = st.columns(3)
-    for i, (_, row) in enumerate(top3.iterrows()):
+    st.markdown("---")
+
+    st.markdown("### 🏆 Top 5 Destinasi Terbaik (Gabungan 3 Metode)")
+    top5 = df_final.head(5)
+    cols = st.columns(5)
+    medal = ["🥇","🥈","🥉","4️⃣","5️⃣"]
+    for i, (_, row) in enumerate(top5.iterrows()):
         with cols[i]:
-            st.info(f"**{row['Place_Name']}**\n\nRank: {i+1}\nScore: {row['TOPSIS_Score']:.3f}")
+            st.markdown(f"""
+            <div style="background:linear-gradient(135deg,{'#FFD700' if i==0 else '#C0C0C0' if i==1 else '#CD7F32' if i==2 else '#667eea'} 0%,{'#FFA500' if i==0 else '#A9A9A9' if i==1 else '#8B4513' if i==2 else '#764ba2'} 100%);
+                 padding:1rem;border-radius:12px;color:white !important;text-align:center;min-height:180px">
+                <div style="font-size:1.8rem;color:white !important;">{medal[i]}</div>
+                <div style="font-weight:800;font-size:0.9rem;margin:4px 0;color:white !important;">{row['Place_Name'][:20]}</div>
+                <div style="font-size:0.75rem;opacity:0.85;color:white !important;">📍 {row['City']}</div>
+                <div style="font-size:0.75rem;margin-top:6px;color:white !important;">TOPSIS: <b>{row['TOPSIS_Score']:.3f}</b></div>
+                <div style="font-size:0.75rem;color:white !important;">⭐ {row['Rating']:.1f} | Rp{row['Price']:,.0f}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-    st.divider()
+    st.markdown("---")
 
     col_l, col_r = st.columns([1, 1])
     with col_l:
@@ -388,7 +380,7 @@ with tab_overview:
     with col_r:
         st.markdown("### 🎫 Distribusi Harga Tiket")
         fig, ax = plt.subplots(figsize=(6, 4))
-        ax.hist(df_work['Price'], bins=15, color='#0984e3', edgecolor='white', alpha=0.85)
+        ax.hist(df_work['Price'], bins=15, color='#667eea', edgecolor='white', alpha=0.85)
         ax.set_title('Distribusi Harga Tiket')
         ax.set_xlabel('Harga (Rp)')
         ax.set_ylabel('Frekuensi')
@@ -401,7 +393,7 @@ with tab_overview:
 #  TAB: SAW
 # ══════════════════════════════════════════════
 with tab_saw:
-    st.markdown("<h2>📐 Metode SAW (Simple Additive Weighting)</h2>", unsafe_allow_html=True)
+    st.markdown("## 📐 Metode SAW (Simple Additive Weighting)")
     st.markdown("""
     <div class="method-box">
     <b>Prinsip:</b> Normalisasi matriks keputusan → kalikan bobot → jumlahkan.<br>
@@ -424,7 +416,7 @@ with tab_saw:
 #  TAB: TOPSIS
 # ══════════════════════════════════════════════
 with tab_topsis:
-    st.markdown("<h2>🎯 Metode TOPSIS</h2>", unsafe_allow_html=True)
+    st.markdown("## 🎯 Metode TOPSIS")
     st.markdown("""
     <div class="method-box">
     <b>Prinsip:</b> Pilih alternatif yang paling dekat ke solusi ideal positif dan terjauh dari ideal negatif.<br>
@@ -447,7 +439,7 @@ with tab_topsis:
 #  TAB: SMART
 # ══════════════════════════════════════════════
 with tab_smart:
-    st.markdown("<h2>⭐ Metode SMART (Simple Multi-Attribute Rating Technique)</h2>", unsafe_allow_html=True)
+    st.markdown("## ⭐ Metode SMART (Simple Multi-Attribute Rating Technique)")
     st.markdown("""
     <div class="method-box">
     <b>Prinsip:</b> Normalisasi nilai ke skala 0–100 (utility function), lalu weighted sum.<br>
@@ -470,7 +462,7 @@ with tab_smart:
 #  TAB: PERBANDINGAN
 # ══════════════════════════════════════════════
 with tab_compare:
-    st.markdown("<h2>🔄 Perbandingan Ketiga Metode</h2>", unsafe_allow_html=True)
+    st.markdown("## 🔄 Perbandingan Ketiga Metode</h2>", unsafe_allow_html=True)
 
     c1, c2, c3 = st.columns(3)
     top_saw    = df_saw.iloc[0]['Place_Name']
@@ -510,7 +502,7 @@ with tab_compare:
 #  TAB: DATA
 # ══════════════════════════════════════════════
 with tab_data:
-    st.markdown("<h2>📁 Dataset Mentah</h2>", unsafe_allow_html=True)
+    st.markdown("## 📁 Dataset Mentah")
     st.info(f"Menampilkan {len(df_work)} destinasi setelah filter")
 
     search = st.text_input("🔎 Cari destinasi...", "")
@@ -525,7 +517,7 @@ with tab_data:
 st.markdown("---")
 st.markdown("""
 <div style="text-align:center; color:#888; font-size:0.82rem">
-    WisataInsight Indonesia &bull; Metode: SMART + SAW + TOPSIS &bull;
+    SPK Pemilihan Destinasi Wisata Indonesia &bull; Metode: SMART + SAW + TOPSIS &bull;
     Dataset: <a href="https://www.kaggle.com/datasets/aprabowo/indonesia-tourism-destination" target="_blank">Kaggle</a>
 </div>
 """, unsafe_allow_html=True)
