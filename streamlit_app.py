@@ -351,12 +351,6 @@ with tab_overview:
 # ══════════════════════════════════════════════
 with tab_saw:
     st.subheader("📐 Metode SAW (Simple Additive Weighting)")
-    st.markdown("""
-    **Prinsip:** Normalisasi matriks keputusan → kalikan bobot → jumlahkan.
-    * **Benefit (↑)**: $r_{ij} = \\frac{x_{ij}}{\\max(x_j)}$
-    * **Cost (↓)**: $r_{ij} = \\frac{\\min(x_j)}{x_{ij}}$
-    * **Skor SAW**: $V_i = \\sum (w_j \\times r_{ij})$
-    """)
 
     top_n_show = st.slider("Tampilkan Top N", 5, min(30, len(df_saw)), 10, key='saw_slider')
 
@@ -387,12 +381,6 @@ with tab_saw:
 # ══════════════════════════════════════════════
 with tab_topsis:
     st.subheader("🎯 Metode TOPSIS")
-    st.markdown("""
-    **Prinsip:** Pilih alternatif yang paling dekat ke solusi ideal positif dan terjauh dari ideal negatif.
-    * **Normalisasi**: $r_{ij} = \\frac{x_{ij}}{\\sqrt{\\sum x_{ij}^2}}$
-    * **Ideal Positif ($A^+$)**: max untuk benefit, min untuk cost
-    * **Skor TOPSIS**: $C_i = \\frac{D^-}{D^+ + D^-}$
-    """)
 
     top_n_t = st.slider("Tampilkan Top N", 5, min(30, len(df_topsis)), 10, key='topsis_slider')
 
@@ -426,12 +414,6 @@ with tab_topsis:
 # ══════════════════════════════════════════════
 with tab_smart:
     st.subheader("⭐ Metode SMART (Simple Multi-Attribute Rating Technique)")
-    st.markdown("""
-    **Prinsip:** Normalisasi nilai ke skala 0–100 (utility function), lalu weighted sum.
-    * **Benefit (↑)**: $u_{ij} = \\frac{x_{ij} - \\min}{\\max - \\min} \\times 100$
-    * **Cost (↓)**: $u_{ij} = \\frac{\\max - x_{ij}}{\\max - \\min} \\times 100$
-    * **Skor SMART**: $V_i = \\sum (w_j \\times u_{ij})$
-    """)
 
     top_n_s = st.slider("Tampilkan Top N", 5, min(30, len(df_smart)), 10, key='smart_slider')
 
