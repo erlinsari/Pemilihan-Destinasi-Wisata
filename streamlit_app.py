@@ -26,86 +26,6 @@ st.set_page_config(
 )
 
 # ─────────────────────────────────────────────
-#  CSS CUSTOM (ANTI TEKS PUTIH / DARK MODE CONFLICT FIX)
-# ─────────────────────────────────────────────
-st.markdown("""
-<style>
-    /* Paksa latar belakang utama aplikasi berwarna terang */
-    .stApp {
-        background-color: #f8f9fa !important;
-    }
-    
-    /* FIX MUTLAK: Paksa semua teks bawaan Streamlit di area utama berwarna gelap agar tidak gaib */
-    .stApp .main .stMarkdown p, 
-    .stApp .main .stMarkdown h1, 
-    .stApp .main .stMarkdown h2, 
-    .stApp .main .stMarkdown h3, 
-    .stApp .main .stMarkdown h4, 
-    .stApp .main .stMarkdown h5, 
-    .stApp .main .stMarkdown h6, 
-    .stApp .main .stMarkdown li, 
-    .stApp .main .stMarkdown span,
-    .stApp .main p,
-    .stApp .main h1,
-    .stApp .main h2,
-    .stApp .main h3 {
-        color: #1a1a2e !important;
-    }
-    
-    /* Perbaikan teks komponen Metric bawaan */
-    [data-testid="stMetricLabel"] div {
-        color: #555555 !important;
-    }
-    [data-testid="stMetricValue"] div {
-        color: #1a1a2e !important;
-    }
-    
-    /* Perbaikan teks komponen Tab bawaan */
-    .stTabs [data-baseweb="tab"] p {
-        color: #555555 !important;
-    }
-    .stTabs [aria-selected="true"] p {
-        color: #667eea !important;
-        font-weight: bold;
-    }
-    
-    /* Perbaikan teks info/warning alert box agar kontras */
-    div[data-testid="stAlert"] p {
-        color: #721c24 !important;
-    }
-
-    /* Style khusus judul & penjelasan */
-    .main-title {
-        font-size: 2.2rem; font-weight: 800; color: #1a1a2e !important;
-        text-align: center; padding: 1rem 0 0.3rem;
-    }
-    .sub-title {
-        font-size: 1rem; color: #555555 !important; text-align: center; margin-bottom: 1.5rem;
-    }
-    .method-box {
-        background: #f8f9ff; border-left: 4px solid #667eea;
-        padding: 0.8rem 1rem; border-radius: 8px; margin: 0.5rem 0;
-        color: #1a1a2e !important;
-    }
-    .method-box * {
-        color: #1a1a2e !important;
-    }
-    
-    /* Sidebar styling tetap gelap elegan */
-    div[data-testid="stSidebar"] {background: #1a1a2e;}
-    div[data-testid="stSidebar"] * {color: #e0e0e0 !important;}
-    div[data-testid="stSidebar"] .stSelectbox label,
-    div[data-testid="stSidebar"] .stSlider label {color: #adb5bd !important;}
-    .stTabs [data-baseweb="tab-list"] {gap: 8px;}
-    .stTabs [data-baseweb="tab"] {
-        border-radius: 8px 8px 0 0;
-        background: #f0f2f6; padding: 8px 20px;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-
-# ─────────────────────────────────────────────
 #  LOAD DATA
 # ─────────────────────────────────────────────
 @st.cache_data
@@ -144,18 +64,13 @@ def load_data():
         }
         records, ratings_list = [], []
         pid = 1
-        cat_choices = ['Budaya','Alam','Taman Hiburan','Bahari']
         for city, places in place_templates.items():
             for place in places:
                 price = np.random.choice([0,5000,10000,15000,20000,25000,30000,50000,75000,100000])
                 rating = round(np.random.uniform(3.5, 5.0), 1)
                 time_m = np.random.choice([60,90,120,150,180,240,300])
                 n_rev = np.random.randint(80, 600)
-                
-                # Perbaikan: Distribusi kategori siklik agar filter kombinasi (misal Bali + Alam) tidak kosong bawaan
-                assigned_cat = cat_choices[pid % 4]
-                
-                records.append({'Place_Id':pid,'Place_Name':place,'Category':assigned_cat,
+                records.append({'Place_Id':pid,'Place_Name':place,'Category':np.random.choice(['Budaya','Alam','Taman Hiburan','Bahari']),
                                 'City':city,'Price':price,'Rating':rating,'Time_Minutes':time_m})
                 for _ in range(n_rev):
                     ratings_list.append({'Place_Id':pid,'Place_Ratings':np.random.randint(1,6)})
@@ -264,9 +179,9 @@ def combine_results(df_base, df_saw, df_topsis, df_smart, criteria):
 #  SIDEBAR
 # ─────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("## 🏝️ SPK Wisata")
+    st.title("🏝️ SPK Wisata")
     st.markdown("---")
-    st.markdown("### 🔍 Filter Data")
+    st.subheader("🔍 Filter Data")
 
     df_all = load_data()
     all_cities = ['Semua'] + sorted(df_all['City'].unique().tolist())
@@ -278,7 +193,7 @@ with st.sidebar:
     top_n = st.slider("Jumlah Alternatif (Top N)", min_value=10, max_value=min(100, len(df_all)), value=40, step=5)
 
     st.markdown("---")
-    st.markdown("### ⚖️ Bobot Kriteria")
+    st.subheader("⚖️ Bobot Kriteria")
     st.caption("Total bobot harus = 100%")
 
     w_price  = st.slider("Harga Tiket (Cost ↓)",       5, 60, 30, 5)
@@ -299,14 +214,14 @@ with st.sidebar:
 # ─────────────────────────────────────────────
 #  MAIN
 # ─────────────────────────────────────────────
-st.markdown('<div class="main-title">🏝️ WisataInsight Indonesia</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">Pemilihan Destinasi Wisata Indonesia • SMART + SAW + TOPSIS</div>', unsafe_allow_html=True)
+st.title("🏝️ Sistem Pendukung Keputusan")
+st.subheader("Pemilihan Destinasi Wisata Indonesia • SMART + SAW + TOPSIS")
 
 if total_w != 100:
     st.error("⚠️ Sesuaikan bobot di sidebar hingga totalnya = 100% untuk menjalankan analisis.")
     st.stop()
 
-# Prepare data & weights
+# ─── Prepare data & weights ───
 CRITERIA = ['Price', 'Rating', 'Jumlah_Review', 'Time_Minutes']
 CRITERIA_LABELS = {
     'Price': 'Harga Tiket (Rp)',
@@ -332,23 +247,21 @@ if selected_cat != 'Semua':
 df_work = df_work.nlargest(top_n, 'Rating').reset_index(drop=True)
 
 if len(df_work) < 3:
-    st.warning("⚠️ Data hasil filter terlalu sedikit (kurang dari 3). Silakan ubah filter Kota atau Kategori di sidebar.")
+    st.warning("Data terlalu sedikit. Ubah filter di sidebar.")
     st.stop()
 
-# Run methods
+# ─── Run methods ───
 df_saw    = saw_method(df_work, CRITERIA, WEIGHTS, BENEFIT)
 df_topsis = topsis_method(df_work, CRITERIA, WEIGHTS, BENEFIT)
 df_smart  = smart_method(df_work, CRITERIA, WEIGHTS, BENEFIT)
 df_final  = combine_results(df_work, df_saw, df_topsis, df_smart, CRITERIA)
 
-
 # ─────────────────────────────────────────────
-#  INITIALIZE TABS
+#  TABS
 # ─────────────────────────────────────────────
 tab_overview, tab_saw, tab_topsis, tab_smart, tab_compare, tab_data = st.tabs([
     "📊 Overview", "📐 SAW", "🎯 TOPSIS", "⭐ SMART", "🔄 Perbandingan", "📁 Data"
 ])
-
 
 # ══════════════════════════════════════════════
 #  TAB: OVERVIEW
@@ -366,29 +279,22 @@ with tab_overview:
 
     st.markdown("---")
 
-    # Top 5 cards
-    st.markdown("### 🏆 Top 5 Destinasi Terbaik (Gabungan 3 Metode)")
+    st.subheader("🏆 Top 5 Destinasi Terbaik (Gabungan 3 Metode)")
     top5 = df_final.head(5)
     cols = st.columns(5)
     medal = ["🥇","🥈","🥉","4️⃣","5️⃣"]
     for i, (_, row) in enumerate(top5.iterrows()):
         with cols[i]:
-            st.markdown(f"""
-            <div style="background:linear-gradient(135deg,{'#FFD700' if i==0 else '#C0C0C0' if i==1 else '#CD7F32' if i==2 else '#667eea'} 0%,{'#FFA500' if i==0 else '#A9A9A9' if i==1 else '#8B4513' if i==2 else '#764ba2'} 100%);
-                 padding:1rem;border-radius:12px;color:white !important;text-align:center;min-height:180px">
-                <div style="font-size:1.8rem;color:white !important;">{medal[i]}</div>
-                <div style="font-weight:800;font-size:0.9rem;margin:4px 0;color:white !important;">{row['Place_Name'][:20]}</div>
-                <div style="font-size:0.75rem;opacity:0.85;color:white !important;">📍 {row['City']}</div>
-                <div style="font-size:0.75rem;margin-top:6px;color:white !important;">TOPSIS: <b>{row['TOPSIS_Score']:.3f}</b></div>
-                <div style="font-size:0.75rem;color:white !important;">⭐ {row['Rating']:.1f} | Rp{row['Price']:,.0f}</div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.info(f"""
+            {medal[i]} **{row['Place_Name'][:20]}** 📍 {row['City']}  
+            TOPSIS: **{row['TOPSIS_Score']:.3f}** ⭐ {row['Rating']:.1f} | Rp{row['Price']:,.0f}
+            """)
 
     st.markdown("---")
 
     col_l, col_r = st.columns([1, 1])
     with col_l:
-        st.markdown("### 📊 Distribusi per Kota")
+        st.subheader("📊 Distribusi per Kota")
         fig, ax = plt.subplots(figsize=(6, 4))
         city_cnt = df_work['City'].value_counts()
         bars = ax.bar(city_cnt.index, city_cnt.values,
@@ -404,7 +310,7 @@ with tab_overview:
         plt.close()
 
     with col_r:
-        st.markdown("### 🎫 Distribusi Harga Tiket")
+        st.subheader("🎫 Distribusi Harga Tiket")
         fig, ax = plt.subplots(figsize=(6, 4))
         ax.hist(df_work['Price'], bins=15, color='#667eea', edgecolor='white', alpha=0.85)
         ax.set_title('Distribusi Harga Tiket')
@@ -414,8 +320,7 @@ with tab_overview:
         st.pyplot(fig)
         plt.close()
 
-    # Bobot
-    st.markdown("### ⚖️ Bobot Kriteria (SMART Framework)")
+    st.subheader("⚖️ Bobot Kriteria")
     col_w1, col_w2 = st.columns([1, 2])
     with col_w1:
         bobot_df = pd.DataFrame({
@@ -445,15 +350,13 @@ with tab_overview:
 #  TAB: SAW
 # ══════════════════════════════════════════════
 with tab_saw:
-    st.markdown("## 📐 Metode SAW (Simple Additive Weighting)")
+    st.subheader("📐 Metode SAW (Simple Additive Weighting)")
     st.markdown("""
-    <div class="method-box">
-    <b>Prinsip:</b> Normalisasi matriks keputusan → kalikan bobot → jumlahkan.<br>
-    • <b>Benefit (↑)</b>: rᵢⱼ = xᵢⱼ / max(xⱼ)<br>
-    • <b>Cost (↓)</b>: rᵢⱼ = min(xⱼ) / xᵢⱼ<br>
-    • <b>Skor SAW</b>: Vᵢ = Σ(wⱼ × rᵢⱼ)
-    </div>
-    """, unsafe_allow_html=True)
+    **Prinsip:** Normalisasi matriks keputusan → kalikan bobot → jumlahkan.
+    * **Benefit (↑)**: $r_{ij} = \\frac{x_{ij}}{\\max(x_j)}$
+    * **Cost (↓)**: $r_{ij} = \\frac{\\min(x_j)}{x_{ij}}$
+    * **Skor SAW**: $V_i = \\sum (w_j \\times r_{ij})$
+    """)
 
     top_n_show = st.slider("Tampilkan Top N", 5, min(30, len(df_saw)), 10, key='saw_slider')
 
@@ -463,7 +366,7 @@ with tab_saw:
     st.dataframe(display_saw.style.background_gradient(subset=['Skor SAW'], cmap='Blues'),
                  hide_index=True, use_container_width=True)
 
-    st.markdown("### 📊 Top 10 - Skor SAW")
+    st.subheader("📊 Top 10 - Skor SAW")
     fig, ax = plt.subplots(figsize=(10, 5))
     top10_saw = df_saw.head(10)
     bars = ax.barh(top10_saw['Place_Name'].str[:22], top10_saw['SAW_Score'],
@@ -483,15 +386,13 @@ with tab_saw:
 #  TAB: TOPSIS
 # ══════════════════════════════════════════════
 with tab_topsis:
-    st.markdown("## 🎯 Metode TOPSIS")
+    st.subheader("🎯 Metode TOPSIS")
     st.markdown("""
-    <div class="method-box">
-    <b>Prinsip:</b> Pilih alternatif yang paling dekat ke solusi ideal positif dan terjauh dari ideal negatif.<br>
-    • <b>Normalisasi</b>: rᵢⱼ = xᵢⱼ / √(Σxᵢⱼ²)<br>
-    • <b>Ideal Positif (A⁺)</b>: max untuk benefit, min untuk cost<br>
-    • <b>Skor TOPSIS</b>: Cᵢ = D⁻ / (D⁺ + D⁻)
-    </div>
-    """, unsafe_allow_html=True)
+    **Prinsip:** Pilih alternatif yang paling dekat ke solusi ideal positif dan terjauh dari ideal negatif.
+    * **Normalisasi**: $r_{ij} = \\frac{x_{ij}}{\\sqrt{\\sum x_{ij}^2}}$
+    * **Ideal Positif ($A^+$)**: max untuk benefit, min untuk cost
+    * **Skor TOPSIS**: $C_i = \\frac{D^-}{D^+ + D^-}$
+    """)
 
     top_n_t = st.slider("Tampilkan Top N", 5, min(30, len(df_topsis)), 10, key='topsis_slider')
 
@@ -501,8 +402,7 @@ with tab_topsis:
     st.dataframe(display_topsis.style.background_gradient(subset=['Skor TOPSIS'], cmap='Greens'),
                  hide_index=True, use_container_width=True)
 
-    # Scatter D+ vs D-
-    st.markdown("### 🗺️ Jarak ke Ideal Positif vs Negatif")
+    st.subheader("🗺️ Jarak ke Ideal Positif vs Negatif")
     fig, ax = plt.subplots(figsize=(9, 5))
     top20 = df_topsis.head(20)
     rest  = df_topsis.iloc[20:]
@@ -525,15 +425,13 @@ with tab_topsis:
 #  TAB: SMART
 # ══════════════════════════════════════════════
 with tab_smart:
-    st.markdown("## ⭐ Metode SMART (Simple Multi-Attribute Rating Technique)")
+    st.subheader("⭐ Metode SMART (Simple Multi-Attribute Rating Technique)")
     st.markdown("""
-    <div class="method-box">
-    <b>Prinsip:</b> Normalisasi nilai ke skala 0–100 (utility function), lalu weighted sum.<br>
-    • <b>Benefit (↑)</b>: uᵢⱼ = (xᵢⱼ − min) / (max − min) × 100<br>
-    • <b>Cost (↓)</b>: uᵢⱼ = (max − xᵢⱼ) / (max − min) × 100<br>
-    • <b>Skor SMART</b>: Vᵢ = Σ(wⱼ × uᵢⱼ)
-    </div>
-    """, unsafe_allow_html=True)
+    **Prinsip:** Normalisasi nilai ke skala 0–100 (utility function), lalu weighted sum.
+    * **Benefit (↑)**: $u_{ij} = \\frac{x_{ij} - \\min}{\\max - \\min} \\times 100$
+    * **Cost (↓)**: $u_{ij} = \\frac{\\max - x_{ij}}{\\max - \\min} \\times 100$
+    * **Skor SMART**: $V_i = \\sum (w_j \\times u_{ij})$
+    """)
 
     top_n_s = st.slider("Tampilkan Top N", 5, min(30, len(df_smart)), 10, key='smart_slider')
 
@@ -543,7 +441,7 @@ with tab_smart:
     st.dataframe(display_smart.style.background_gradient(subset=['Skor SMART'], cmap='Oranges'),
                  hide_index=True, use_container_width=True)
 
-    st.markdown("### 📊 Top 10 - Skor SMART")
+    st.subheader("📊 Top 10 - Skor SMART")
     fig, ax = plt.subplots(figsize=(10, 5))
     top10_sm = df_smart.head(10)
     bars = ax.barh(top10_sm['Place_Name'].str[:22], top10_sm['SMART_Score'],
@@ -563,9 +461,8 @@ with tab_smart:
 #  TAB: PERBANDINGAN
 # ══════════════════════════════════════════════
 with tab_compare:
-    st.markdown("## 🔄 Perbandingan Ketiga Metode")
+    st.subheader("🔄 Perbandingan Ketiga Metode")
 
-    # Metrics
     c1, c2, c3 = st.columns(3)
     top_saw    = df_saw.iloc[0]['Place_Name']
     top_topsis = df_topsis.iloc[0]['Place_Name']
@@ -576,8 +473,7 @@ with tab_compare:
 
     st.markdown("---")
 
-    # Tabel perbandingan
-    st.markdown("### 📋 Tabel Perbandingan Ranking Top 15")
+    st.subheader("📋 Tabel Perbandingan Ranking Top 15")
     show_cols = ['Final_Rank','Place_Name','City','SAW_Rank','TOPSIS_Rank','SMART_Rank','Avg_Rank','SAW_Score','TOPSIS_Score','SMART_Score']
     df_show = df_final.head(15)[show_cols].copy()
     df_show.columns = ['Final Rank','Destinasi','Kota','Rank SAW','Rank TOPSIS','Rank SMART','Avg Rank','Skor SAW','Skor TOPSIS','Skor SMART']
@@ -588,7 +484,7 @@ with tab_compare:
 
     col_l, col_r = st.columns(2)
     with col_l:
-        st.markdown("### 🌡️ Heatmap Ranking")
+        st.subheader("🌡️ Heatmap Ranking")
         top15 = df_final.head(15)[['Place_Name','SAW_Rank','TOPSIS_Rank','SMART_Rank']].copy()
         top15 = top15.set_index('Place_Name')
         top15.index = top15.index.str[:18]
@@ -604,7 +500,7 @@ with tab_compare:
         plt.close()
 
     with col_r:
-        st.markdown("### 📈 Korelasi Spearman")
+        st.subheader("📈 Korelasi Spearman")
         pairs = [('SAW_Rank','TOPSIS_Rank','SAW vs TOPSIS'),
                  ('SAW_Rank','SMART_Rank','SAW vs SMART'),
                  ('TOPSIS_Rank','SMART_Rank','TOPSIS vs SMART')]
@@ -615,12 +511,11 @@ with tab_compare:
                               'Status': '✅ Konsisten' if r > 0.8 else '⚠️ Berbeda'})
         st.dataframe(pd.DataFrame(corr_data), hide_index=True, use_container_width=True)
 
-        st.markdown("#### Skor per Metode (Top 10)")
+        st.subheader("Skor per Metode (Top 10)")
         fig, ax = plt.subplots(figsize=(7, 5))
         top10 = df_final.head(10)
         x = np.arange(len(top10))
         w = 0.25
-        # Normalize SMART to 0-1 for comparison
         smart_norm = top10['SMART_Score'] / 100
         ax.bar(x - w, top10['SAW_Score'],    w, label='SAW',    color='#2196F3', alpha=0.85)
         ax.bar(x,     top10['TOPSIS_Score'], w, label='TOPSIS', color='#4CAF50', alpha=0.85)
@@ -633,9 +528,8 @@ with tab_compare:
         st.pyplot(fig)
         plt.close()
 
-    # Export
     st.markdown("---")
-    st.markdown("### 💾 Download Hasil")
+    st.subheader("💾 Download Hasil")
     col_d1, col_d2, col_d3 = st.columns(3)
 
     def to_csv_bytes(df):
@@ -655,7 +549,7 @@ with tab_compare:
 #  TAB: DATA
 # ══════════════════════════════════════════════
 with tab_data:
-    st.markdown("## 📁 Dataset Mentah")
+    st.subheader("📁 Dataset Mentah")
     st.info(f"Menampilkan {len(df_work)} destinasi setelah filter")
 
     search = st.text_input("🔎 Cari destinasi...", "")
@@ -666,14 +560,9 @@ with tab_data:
     st.dataframe(df_display[['Place_Name','City','Category','Price','Rating','Jumlah_Review','Time_Minutes']],
                  hide_index=True, use_container_width=True, height=450)
 
-    st.markdown("### 📊 Statistik Deskriptif")
+    st.subheader("📊 Statistik Deskriptif")
     st.dataframe(df_work[CRITERIA].describe().round(2), use_container_width=True)
 
 # Footer
 st.markdown("---")
-st.markdown("""
-<div style="text-align:center; color:#888; font-size:0.82rem">
-    SPK Pemilihan Destinasi Wisata Indonesia &bull; Metode: SMART + SAW + TOPSIS &bull;
-    Dataset: <a href="https://www.kaggle.com/datasets/aprabowo/indonesia-tourism-destination" target="_blank">Kaggle</a>
-</div>
-""", unsafe_allow_html=True)
+st.caption("SPK Pemilihan Destinasi Wisata Indonesia • Metode: SMART + SAW + TOPSIS • Dataset: Kaggle")
