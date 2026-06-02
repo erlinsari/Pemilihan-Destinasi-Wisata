@@ -14,7 +14,7 @@ import seaborn as sns
 from scipy.stats import spearmanr
 import io
 import os
-
+sns.set_style("whitegrid")
 # ─────────────────────────────────────────────
 #  CONFIG
 # ─────────────────────────────────────────────
@@ -298,7 +298,7 @@ with tab_overview:
         fig, ax = plt.subplots(figsize=(6, 4))
         city_cnt = df_work['City'].value_counts()
         bars = ax.bar(city_cnt.index, city_cnt.values,
-                      color=sns.color_palette('Set2', len(city_cnt)))
+                      color=.color_palette('Set2', len(city_cnt)))
         for b in bars:
             ax.text(b.get_x()+b.get_width()/2, b.get_height()+0.2,
                     str(int(b.get_height())), ha='center', fontweight='bold')
@@ -471,7 +471,7 @@ with tab_compare:
         top15 = top15.set_index('Place_Name')
         top15.index = top15.index.str[:18]
         fig, ax = plt.subplots(figsize=(6, 7))
-        sns.heatmap(top15, annot=True, fmt='.0f', cmap='YlOrRd_r',
+        .heatmap(top15, annot=True, fmt='.0f', cmap='YlOrRd_r',
                     linewidths=0.5, ax=ax,
                     cbar_kws={'label':'Ranking'})
         ax.set_title('Ranking per Metode (Top 15)', fontweight='bold')
