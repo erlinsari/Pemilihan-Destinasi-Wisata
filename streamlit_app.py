@@ -14,7 +14,10 @@ import seaborn as sns
 from scipy.stats import spearmanr
 import io
 import os
+
+# Set tema dasar seaborn ke whitegrid untuk background putih yang bersih
 sns.set_style("whitegrid")
+
 # ─────────────────────────────────────────────
 #  CONFIG
 # ─────────────────────────────────────────────
@@ -295,15 +298,17 @@ with tab_overview:
     col_l, col_r = st.columns([1, 1])
     with col_l:
         st.subheader("📊 Distribusi per Kota")
-        fig, ax = plt.subplots(figsize=(6, 4))
+        fig, ax = plt.subplots(figsize=(6, 4), facecolor='white')
+        ax.set_facecolor('white')
         city_cnt = df_work['City'].value_counts()
         bars = ax.bar(city_cnt.index, city_cnt.values,
-                      color=.color_palette('Set2', len(city_cnt)))
+                      color=sns.color_palette('Set2', len(city_cnt)))
         for b in bars:
             ax.text(b.get_x()+b.get_width()/2, b.get_height()+0.2,
-                    str(int(b.get_height())), ha='center', fontweight='bold')
-        ax.set_title('Jumlah Destinasi per Kota')
-        ax.set_ylabel('Jumlah')
+                    str(int(b.get_height())), ha='center', fontweight='bold', color='#333333')
+        ax.set_title('Jumlah Destinasi per Kota', color='#333333', fontweight='bold')
+        ax.set_ylabel('Jumlah', color='#333333')
+        ax.tick_params(colors='#333333')
         plt.xticks(rotation=15)
         plt.tight_layout()
         st.pyplot(fig)
@@ -311,11 +316,13 @@ with tab_overview:
 
     with col_r:
         st.subheader("🎫 Distribusi Harga Tiket")
-        fig, ax = plt.subplots(figsize=(6, 4))
+        fig, ax = plt.subplots(figsize=(6, 4), facecolor='white')
+        ax.set_facecolor('white')
         ax.hist(df_work['Price'], bins=15, color='#667eea', edgecolor='white', alpha=0.85)
-        ax.set_title('Distribusi Harga Tiket')
-        ax.set_xlabel('Harga (Rp)')
-        ax.set_ylabel('Frekuensi')
+        ax.set_title('Distribusi Harga Tiket', color='#333333', fontweight='bold')
+        ax.set_xlabel('Harga (Rp)', color='#333333')
+        ax.set_ylabel('Frekuensi', color='#333333')
+        ax.tick_params(colors='#333333')
         plt.tight_layout()
         st.pyplot(fig)
         plt.close()
@@ -330,16 +337,18 @@ with tab_overview:
         })
         st.dataframe(bobot_df, hide_index=True, use_container_width=True)
     with col_w2:
-        fig, ax = plt.subplots(figsize=(7, 3))
+        fig, ax = plt.subplots(figsize=(7, 3), facecolor='white')
+        ax.set_facecolor('white')
         labels = [CRITERIA_LABELS[c] for c in CRITERIA]
         vals   = [WEIGHTS[c] for c in CRITERIA]
         colors_b = ['#FF6B6B','#4ECDC4','#45B7D1','#FFA07A']
         bars = ax.barh(labels, vals, color=colors_b, edgecolor='white')
         for bar, v in zip(bars, vals):
             ax.text(bar.get_width()+0.005, bar.get_y()+bar.get_height()/2,
-                    f'{v:.0%}', va='center', fontweight='bold')
+                    f'{v:.0%}', va='center', fontweight='bold', color='#333333')
         ax.set_xlim(0, max(vals)*1.2)
-        ax.set_title('Bobot Kriteria')
+        ax.set_title('Bobot Kriteria', color='#333333', fontweight='bold')
+        ax.tick_params(colors='#333333')
         ax.invert_yaxis()
         plt.tight_layout()
         st.pyplot(fig)
@@ -361,15 +370,17 @@ with tab_saw:
                  hide_index=True, use_container_width=True)
 
     st.subheader("📊 Top 10 - Skor SAW")
-    fig, ax = plt.subplots(figsize=(10, 5))
+    fig, ax = plt.subplots(figsize=(10, 5), facecolor='white')
+    ax.set_facecolor('white')
     top10_saw = df_saw.head(10)
     bars = ax.barh(top10_saw['Place_Name'].str[:22], top10_saw['SAW_Score'],
                    color='#2196F3', edgecolor='white', alpha=0.85)
     for bar, val in zip(bars, top10_saw['SAW_Score']):
         ax.text(bar.get_width()*0.5, bar.get_y()+bar.get_height()/2,
                 f'{val:.3f}', ha='center', va='center', color='white', fontweight='bold', fontsize=9)
-    ax.set_title('Top 10 Destinasi - Skor SAW', fontweight='bold')
-    ax.set_xlabel('Skor SAW')
+    ax.set_title('Top 10 Destinasi - Skor SAW', color='#333333', fontweight='bold')
+    ax.set_xlabel('Skor SAW', color='#333333')
+    ax.tick_params(colors='#333333')
     ax.invert_yaxis()
     plt.tight_layout()
     st.pyplot(fig)
@@ -391,7 +402,8 @@ with tab_topsis:
                  hide_index=True, use_container_width=True)
 
     st.subheader("🗺️ Jarak ke Ideal Positif vs Negatif")
-    fig, ax = plt.subplots(figsize=(9, 5))
+    fig, ax = plt.subplots(figsize=(9, 5), facecolor='white')
+    ax.set_facecolor('white')
     top20 = df_topsis.head(20)
     rest  = df_topsis.iloc[20:]
     ax.scatter(rest['D_pos'], rest['D_neg'], alpha=0.3, color='#ccc', label='Lainnya', s=40)
@@ -399,11 +411,12 @@ with tab_topsis:
                     cmap='RdYlGn', s=100, zorder=5, edgecolors='white')
     for _, row in top20.head(5).iterrows():
         ax.annotate(row['Place_Name'][:16], (row['D_pos'], row['D_neg']),
-                    textcoords='offset points', xytext=(5, 5), fontsize=7.5, color='#333')
+                    textcoords='offset points', xytext=(5, 5), fontsize=7.5, color='#333333')
     plt.colorbar(sc, ax=ax, label='Skor TOPSIS')
-    ax.set_xlabel('Jarak ke Ideal Positif (D⁺) → lebih kecil lebih baik')
-    ax.set_ylabel('Jarak ke Ideal Negatif (D⁻) → lebih besar lebih baik')
-    ax.set_title('Scatter: D⁺ vs D⁻ per Destinasi', fontweight='bold')
+    ax.set_xlabel('Jarak ke Ideal Positif (D⁺) → lebih kecil lebih baik', color='#333333')
+    ax.set_ylabel('Jarak ke Ideal Negatif (D⁻) → lebih besar lebih baik', color='#333333')
+    ax.set_title('Scatter: D⁺ vs D⁻ per Destinasi', color='#333333', fontweight='bold')
+    ax.tick_params(colors='#333333')
     plt.tight_layout()
     st.pyplot(fig)
     plt.close()
@@ -424,15 +437,17 @@ with tab_smart:
                  hide_index=True, use_container_width=True)
 
     st.subheader("📊 Top 10 - Skor SMART")
-    fig, ax = plt.subplots(figsize=(10, 5))
+    fig, ax = plt.subplots(figsize=(10, 5), facecolor='white')
+    ax.set_facecolor('white')
     top10_sm = df_smart.head(10)
     bars = ax.barh(top10_sm['Place_Name'].str[:22], top10_sm['SMART_Score'],
                    color='#FF5722', edgecolor='white', alpha=0.85)
     for bar, val in zip(bars, top10_sm['SMART_Score']):
         ax.text(bar.get_width()*0.5, bar.get_y()+bar.get_height()/2,
                 f'{val:.1f}', ha='center', va='center', color='white', fontweight='bold', fontsize=9)
-    ax.set_title('Top 10 Destinasi - Skor SMART', fontweight='bold')
-    ax.set_xlabel('Skor SMART (0-100)')
+    ax.set_title('Top 10 Destinasi - Skor SMART', color='#333333', fontweight='bold')
+    ax.set_xlabel('Skor SMART (0-100)', color='#333333')
+    ax.tick_params(colors='#333333')
     ax.invert_yaxis()
     plt.tight_layout()
     st.pyplot(fig)
@@ -470,12 +485,13 @@ with tab_compare:
         top15 = df_final.head(15)[['Place_Name','SAW_Rank','TOPSIS_Rank','SMART_Rank']].copy()
         top15 = top15.set_index('Place_Name')
         top15.index = top15.index.str[:18]
-        fig, ax = plt.subplots(figsize=(6, 7))
-        .heatmap(top15, annot=True, fmt='.0f', cmap='YlOrRd_r',
+        fig, ax = plt.subplots(figsize=(6, 7), facecolor='white')
+        sns.heatmap(top15, annot=True, fmt='.0f', cmap='YlOrRd_r',
                     linewidths=0.5, ax=ax,
                     cbar_kws={'label':'Ranking'})
-        ax.set_title('Ranking per Metode (Top 15)', fontweight='bold')
-        ax.set_xticklabels(['SAW','TOPSIS','SMART'])
+        ax.set_title('Ranking per Metode (Top 15)', color='#333333', fontweight='bold')
+        ax.set_xticklabels(['SAW','TOPSIS','SMART'], color='#333333')
+        ax.tick_params(colors='#333333')
         plt.yticks(fontsize=8.5)
         plt.tight_layout()
         st.pyplot(fig)
@@ -494,7 +510,8 @@ with tab_compare:
         st.dataframe(pd.DataFrame(corr_data), hide_index=True, use_container_width=True)
 
         st.subheader("Skor per Metode (Top 10)")
-        fig, ax = plt.subplots(figsize=(7, 5))
+        fig, ax = plt.subplots(figsize=(7, 5), facecolor='white')
+        ax.set_facecolor('white')
         top10 = df_final.head(10)
         x = np.arange(len(top10))
         w = 0.25
@@ -503,8 +520,9 @@ with tab_compare:
         ax.bar(x,     top10['TOPSIS_Score'], w, label='TOPSIS', color='#4CAF50', alpha=0.85)
         ax.bar(x + w, smart_norm,            w, label='SMART/100', color='#FF5722', alpha=0.85)
         ax.set_xticks(x)
-        ax.set_xticklabels(top10['Place_Name'].str[:12], rotation=35, ha='right', fontsize=8)
-        ax.set_title('Perbandingan Skor Ternormalisasi', fontweight='bold')
+        ax.set_xticklabels(top10['Place_Name'].str[:12], rotation=35, ha='right', fontsize=8, color='#333333')
+        ax.set_title('Perbandingan Skor Ternormalisasi', color='#333333', fontweight='bold')
+        ax.tick_params(colors='#333333')
         ax.legend()
         plt.tight_layout()
         st.pyplot(fig)
